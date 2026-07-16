@@ -1,0 +1,20 @@
+Jul 15 10:01:12 homelab sshd[1234]: Failed password for invalid user admin from 192.168.1.105 port 22 ssh2
+Jul 15 10:01:14 homelab sshd[1234]: Failed password for invalid user admin from 192.168.1.105 port 22 ssh2
+Jul 15 10:01:16 homelab sshd[1234]: Failed password for invalid user root from 192.168.1.105 port 22 ssh2
+Jul 15 10:01:18 homelab sshd[1234]: Too many authentication failures for root from 192.168.1.105
+Jul 15 10:02:00 homelab sudo: alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/bin/systemctl restart nginx
+Jul 15 10:03:44 homelab kernel: [UFW BLOCK] IN=eth0 OUT= MAC=... SRC=10.0.0.50 DST=192.168.1.1 PROTO=TCP SPT=45231 DPT=22 SYN
+Jul 15 10:04:11 homelab sshd[1290]: Accepted publickey for alice from 192.168.1.10 port 51230 ssh2
+Jul 15 10:05:00 homelab kernel: Out of memory: killed process 8812 (java) total-vm:2048000kB
+Jul 15 10:06:30 homelab useradd[9000]: new user: name=backup, UID=1001, GID=1001
+Jul 15 10:07:55 homelab sshd[1300]: Accepted password for root from 192.168.1.200 port 5522 ssh2
+Jul 15 10:08:01 homelab sshd[1301]: Invalid user oracle from 203.0.113.42 port 33421
+Jul 15 10:08:02 homelab sshd[1301]: Invalid user oracle from 203.0.113.42 port 33422
+Jul 15 10:08:03 homelab sshd[1301]: BREAK-IN ATTEMPT by 203.0.113.42
+Jul 15 10:09:12 homelab nginx: 2026/07/15 10:09:12 [info] 2345#2345: *1 client connected from 10.0.0.1
+Jul 15 10:10:00 homelab kernel: segfault at 0 ip 00007f8d1c3a2f10 sp 00007ffd5e3a2100 error 4 in libssl.so
+Jul 15 10:11:30 homelab sshd[1350]: Failed password for bob from 198.51.100.7 port 44001 ssh2
+Jul 15 10:12:00 homelab cron[1400]: (root) CMD (/usr/local/bin/backup.sh)
+Jul 15 10:13:15 homelab kernel: [UFW BLOCK] IN=eth0 OUT= SRC=198.51.100.99 DST=192.168.1.1 PROTO=TCP DPT=443 REJECT
+Jul 15 10:14:00 homelab systemd[1]: nginx.service: Main process exited, code=killed, status=11/SEGV
+Jul 15 10:15:00 homelab sshd[1400]: Accepted publickey for bob from 192.168.1.11 port 52100 ssh2

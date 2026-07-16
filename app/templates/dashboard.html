@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ config.siem.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0"><i class="bi bi-speedometer2 me-2 text-warning"></i>Dashboard</h4>
+  <small class="text-muted">Auto-refreshes every {{ config.web.refresh_interval }}s</small>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4" id="stat-cards">
+  <div class="col-6 col-lg-3">
+    <div class="card border-secondary h-100">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Total Events</div>
+        <div class="fs-3 fw-bold" id="total-events">{{ stats.total_events }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-danger h-100">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Total Alerts</div>
+        <div class="fs-3 fw-bold text-danger" id="total-alerts">{{ stats.total_alerts }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-warning h-100">
+      <div class="card-body">
+        <div class="text-muted small mb-1">High / Critical</div>
+        <div class="fs-3 fw-bold text-warning" id="high-critical">
+          {{ (stats.severity_counts.get('high', 0) + stats.severity_counts.get('critical', 0)) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-info h-100">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Info / Low</div>
+        <div class="fs-3 fw-bold text-info" id="info-low">
+          {{ (stats.severity_counts.get('info', 0) + stats.severity_counts.get('low', 0)) }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card border-secondary">
+      <div class="card-header text-muted small">Events — Last 24 Hours</div>
+      <div class="card-body">
+        <canvas id="timelineChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-secondary">
+      <div class="card-header text-muted small">Events by Severity</div>
+      <div class="card-body d-flex justify-content-center">
+        <canvas id="severityChart" style="max-height:220px"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom row -->
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card border-secondary">
+      <div class="card-header text-muted small">Recent Alerts</div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-dark table-hover mb-0">
+          <thead><tr>
+            <th>Time</th><th>Rule</th><th>Severity</th>
+          </tr></thead>
+          <tbody id="recent-alerts-body">
+            {% for a in stats.recent_alerts %}
+            <tr>
+              <td class="text-muted small">{{ a.timestamp }}</td>
+              <td>{{ a.rule_name }}</td>
+              <td>{{ a.severity | upper | badge | safe }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-muted text-center py-3">No alerts yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-secondary">
+      <div class="card-header text-muted small">Top Event Sources</div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-dark table-hover mb-0">
+          <thead><tr><th>Source</th><th class="text-end">Count</th></tr></thead>
+          <tbody id="top-sources-body">
+            {% for s in stats.top_sources %}
+            <tr>
+              <td>{{ s.source }}</td>
+              <td class="text-end text-muted">{{ s.cnt }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="2" class="text-muted text-center py-3">No events yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REFRESH_INTERVAL = {{ config.web.refresh_interval }} * 1000;
+
+// ---- Timeline chart ----
+const tlLabels = {{ stats.timeline | map(attribute='hour') | list | tojson }};
+const tlData   = {{ stats.timeline | map(attribute='cnt')  | list | tojson }};
+
+const timelineChart = new Chart(document.getElementById('timelineChart'), {
+  type: 'bar',
+  data: {
+    labels: tlLabels.map(h => h.slice(11, 16)), // show HH:MM
+    datasets: [{
+      label: 'Events',
+      data: tlData,
+      backgroundColor: 'rgba(255, 193, 7, 0.5)',
+      borderColor: 'rgba(255, 193, 7, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+
+// ---- Severity doughnut ----
+const sevCounts = {{ stats.severity_counts | tojson }};
+const sevLabels = ['critical','high','medium','low','info'];
+const sevColors = ['#dc3545','#fd7e14','#ffc107','#0dcaf0','#6c757d'];
+
+new Chart(document.getElementById('severityChart'), {
+  type: 'doughnut',
+  data: {
+    labels: sevLabels,
+    datasets: [{
+      data: sevLabels.map(s => sevCounts[s] || 0),
+      backgroundColor: sevColors,
+      borderWidth: 1
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+// ---- Auto-refresh stats ----
+async function refreshStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const s = await r.json();
+    document.getElementById('total-events').textContent = s.total_events;
+    document.getElementById('total-alerts').textContent = s.total_alerts;
+    document.getElementById('high-critical').textContent =
+      (s.severity_counts['high'] || 0) + (s.severity_counts['critical'] || 0);
+    document.getElementById('info-low').textContent =
+      (s.severity_counts['info'] || 0) + (s.severity_counts['low'] || 0);
+
+    // Update timeline chart
+    timelineChart.data.labels = s.timeline.map(h => h.hour.slice(11,16));
+    timelineChart.data.datasets[0].data = s.timeline.map(h => h.cnt);
+    timelineChart.update();
+  } catch(e) { /* server may be reloading */ }
+}
+
+setInterval(refreshStats, REFRESH_INTERVAL);
+</script>
+{% endblock %}

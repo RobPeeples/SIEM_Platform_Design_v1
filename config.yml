@@ -1,0 +1,23 @@
+siem:
+  name: "Home Lab SIEM"
+  database: "siem.db"
+
+ingestion:
+  # Add paths to log files you want to monitor.
+  # Use forward slashes or escape backslashes on Windows.
+  watch_paths:
+    - "logs/"
+  # File extensions to ingest
+  extensions:
+    - ".log"
+    - ".txt"
+
+rules:
+  path: "rules/default_rules.json"
+
+web:
+  host: "127.0.0.1"
+  port: 5000
+  debug: false
+  # How often the dashboard auto-refreshes (seconds)
+  refresh_interval: 15

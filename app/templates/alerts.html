@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Alerts — {{ config.siem.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-bell me-2 text-danger"></i>Alerts</h4>
+</div>
+
+<div class="card border-secondary">
+  <div class="card-body p-0">
+    <table class="table table-sm table-dark table-hover mb-0">
+      <thead class="table-secondary">
+        <tr>
+          <th style="width:160px">Timestamp</th>
+          <th style="width:100px">Severity</th>
+          <th style="width:200px">Rule</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td class="text-muted small align-middle">{{ a.timestamp }}</td>
+          <td class="align-middle">{{ a.severity | upper | badge | safe }}</td>
+          <td class="small align-middle">{{ a.rule_name }}</td>
+          <td class="small align-middle font-monospace text-truncate" style="max-width:550px">{{ a.message }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted py-4">No alerts yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between mt-3">
+  {% if page > 1 %}
+  <a href="?page={{ page - 1 }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-chevron-left"></i> Previous
+  </a>
+  {% else %}<span></span>{% endif %}
+  <span class="text-muted small align-self-center">Page {{ page }}</span>
+  {% if alerts | length == 50 %}
+  <a href="?page={{ page + 1 }}" class="btn btn-sm btn-outline-secondary">
+    Next <i class="bi bi-chevron-right"></i>
+  </a>
+  {% else %}<span></span>{% endif %}
+</div>
+{% endblock %}

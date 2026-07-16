@@ -1,0 +1,82 @@
+[
+  {
+    "id": "rule_001",
+    "name": "Failed SSH Login",
+    "description": "Detects failed SSH authentication attempts",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "Failed password|authentication failure|Invalid user",
+    "severity": "high",
+    "source_filter": null
+  },
+  {
+    "id": "rule_002",
+    "name": "Successful Root Login",
+    "description": "Detects root logins which should be rare or disabled",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "Accepted (password|publickey) for root",
+    "severity": "critical",
+    "source_filter": null
+  },
+  {
+    "id": "rule_003",
+    "name": "Sudo Privilege Escalation",
+    "description": "Detects sudo usage",
+    "enabled": true,
+    "type": "keyword",
+    "pattern": "sudo:",
+    "severity": "medium",
+    "source_filter": null
+  },
+  {
+    "id": "rule_004",
+    "name": "Port Scan Detected",
+    "description": "Detects potential port scanning activity",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "SYN_RECV|nmap|port scan|half-open",
+    "severity": "high",
+    "source_filter": null
+  },
+  {
+    "id": "rule_005",
+    "name": "Brute Force Attempt",
+    "description": "Detects repeated login failures from same host",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "BREAK-IN ATTEMPT|repeated login failures|Too many authentication failures",
+    "severity": "critical",
+    "source_filter": null
+  },
+  {
+    "id": "rule_006",
+    "name": "Service Crash",
+    "description": "Detects service or process crashes",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "segfault|core dumped|Out of memory|killed process",
+    "severity": "high",
+    "source_filter": null
+  },
+  {
+    "id": "rule_007",
+    "name": "Firewall Block",
+    "description": "Detects firewall-blocked connections",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "\\[UFW BLOCK\\]|DROPPED|REJECT",
+    "severity": "medium",
+    "source_filter": null
+  },
+  {
+    "id": "rule_008",
+    "name": "New User Created",
+    "description": "Detects creation of new system users",
+    "enabled": true,
+    "type": "regex",
+    "pattern": "useradd|adduser|new user",
+    "severity": "medium",
+    "source_filter": null
+  }
+]
