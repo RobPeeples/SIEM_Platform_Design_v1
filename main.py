@@ -24,6 +24,9 @@ def main():
     ingest_cfg = config["ingestion"]
     rules_path = config["rules"]["path"]
 
+    # create_app() must run first — it calls init_db()
+    app = create_app()
+
     # Load alert rules
     load_rules(rules_path)
     print(f"[siem] Rules loaded from {rules_path}")
@@ -37,8 +40,6 @@ def main():
         extensions=ingest_cfg["extensions"],
     )
     print(f"[siem] Watching: {ingest_cfg['watch_paths']}")
-
-    app = create_app()
 
     host = web_cfg["host"]
     port = web_cfg["port"]
